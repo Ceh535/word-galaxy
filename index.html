@@ -1671,7 +1671,7 @@ const VOX_VER="75";
 const VOX={packOf:{},map:{},packs:["words","lines","chars","lab","fun","slow"],loaded:{},src:null,busy:false,next:null,gen:0};
 try{if(navigator.audioSession)navigator.audioSession.type="playback"}catch(e){} // play even with the silent switch on, like the iPad voice
 const vk=(ch,t,slow)=>((!ch||ch==="narrator")?"narrator":ch)+"|"+(slow?"s|":"")+String(t).toLowerCase().replace(/\s+/g," ").trim();
-async function voxLoad(name){if(VOX.loaded[name])return;VOX.loaded[name]=1;try{const r=await fetch("voice/"+name+".json?v="+VOX_VER);if(!r.ok)throw 0;const j=await r.json();Object.assign(VOX.map,j);for(const k2 in j)VOX.packOf[k2]=name}catch(e){VOX.loaded[name]=0}}
+async function voxLoad(name){if(VOX.loaded[name])return;VOX.loaded[name]=1;try{let r=null;for(const pre of ["voice/",""]){try{r=await fetch(pre+name+".json?v="+VOX_VER);if(r.ok)break}catch(e2){}r=null}if(!r)throw 0;const j=await r.json();Object.assign(VOX.map,j);for(const k2 in j)VOX.packOf[k2]=name}catch(e){VOX.loaded[name]=0}}
 (async()=>{for(const n of VOX.packs)await voxLoad(n)})();
 const voxBuf=new Map();
 // sounds on iPad only start after a tap: wake the audio on the first touch, and keep it awake
