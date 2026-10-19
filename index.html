@@ -8,8 +8,23 @@
 <meta name="apple-mobile-web-app-title" content="Word Galaxy">
 <meta name="theme-color" content="#170f45">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+
+<script>try{if(localStorage.getItem("wg-unlocked")!=="1")document.documentElement.classList.add("wg-locked")}catch(e){document.documentElement.classList.add("wg-locked")}</script>
+<style>
+#gate{display:none}
+html.wg-locked body>*:not(#gate){display:none!important}
+html.wg-locked #gate{display:flex;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 70% -10%,#3b2a9e 0%,#170f45 60%);font-family:"Fredoka","Trebuchet MS",system-ui,sans-serif;color:#fff}
+#gate form{background:#2e2280;border:3px solid #5a4bd1;border-radius:28px;padding:32px 28px;width:100%;max-width:380px;box-sizing:border-box;text-align:center;display:flex;flex-direction:column;gap:16px}
+#gate img{width:96px;height:96px;border-radius:22px;margin:0 auto}
+#gate h1{margin:0;font-family:"Lilita One","Fredoka",sans-serif;font-weight:400;font-size:2rem}
+#gate p{margin:0;color:#c6c0f2;font-size:1.05rem}
+#gate input{font:inherit;font-size:1.4rem;text-align:center;padding:14px;border-radius:16px;border:3px solid #5a4bd1;background:#170f45;color:#fff;width:100%;box-sizing:border-box}
+#gate input:focus{outline:none;border-color:#ffd23f}
+#gate button{font:inherit;font-size:1.3rem;font-weight:700;padding:14px;border:0;border-radius:16px;background:#ffd23f;color:#170f45;cursor:pointer}
+#gate .err{color:#ff8a8a;min-height:1.3em;font-size:1rem}
+</style>
 <title>Arlo's Word Galaxy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Lilita+One&family=Fredoka:wght@500;600;700&family=Lexend:wght@500;700&family=Comic+Neue:wght@700&display=swap">
@@ -966,6 +981,21 @@ body.calm .hword .hgap{animation:none}
 .pcost{font-family:var(--display);font-size:1.5rem;color:var(--star);background:#0004;border-radius:99px;padding:2px 14px;align-self:center}
 </style>
 </head><body>
+<div id="gate"><form id="gateForm" autocomplete="off">
+<img src="icon-192.png" alt="">
+<h1>Word Galaxy</h1>
+<p>Type the secret password to launch</p>
+<input id="gatePw" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Password">
+<button type="submit">Blast off! 🚀</button>
+<div class="err" id="gateErr" role="alert"></div>
+</form></div>
+<script>(function(){var H="d3441f97611a44369034b7f740e6ba7656d6b6a9a95a07a4d085fb0d1faf7f26";
+async function sha(t){var b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,"0")}).join("")}
+document.getElementById("gateForm").addEventListener("submit",async function(e){e.preventDefault();var i=document.getElementById("gatePw");
+var ok=false;try{ok=(await sha(i.value.trim()))===H}catch(err){}
+if(ok){try{localStorage.setItem("wg-unlocked","1")}catch(err){}document.documentElement.classList.remove("wg-locked");window.dispatchEvent(new Event("resize"))}
+else{document.getElementById("gateErr").textContent="Not quite — try again!";i.value="";i.focus()}});})();</script>
+
 
 <canvas id="stars" aria-hidden="true"></canvas>
 <div class="app" id="app"></div>
