@@ -1205,8 +1205,8 @@ Object.defineProperty(app,"innerHTML",{configurable:true,get(){return _ih.get.ca
 const CAPS={}; "I Mr Mrs Ms Dr Miss Monday Tuesday Wednesday Thursday Friday Saturday Sunday January February March April May June July August September October November December England Britain London Christmas Easter".split(" ").forEach(w=>CAPS[w.toLowerCase()]=w);
 function fixCase(w){const l=String(w).toLowerCase();return CAPS[l]||l}
 let S=load();
-const BUILD="20261020b";
-function restoreOld(){try{if(S.restored1)return;S.stars=(S.stars||0)+22;S.restored1=true;save()}catch(e){}}
+const BUILD="20261020d";
+function restoreOld(){}
 function checkUpdate(){try{fetch("./?u="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.text():"").then(t=>{const m=t.match(/const BUILD="(\w+)"/);if(!m||m[1]===BUILD)return;
  let tried="";try{tried=sessionStorage.getItem("wg-upd")||""}catch(e){}if(tried===m[1])return;try{sessionStorage.setItem("wg-upd",m[1])}catch(e){}
  if(R||T)return;location.replace("./?v="+m[1])}).catch(()=>{})}catch(e){}}
@@ -1937,7 +1937,7 @@ function burst(el){if(reduced())return;const r=el.getBoundingClientRect();for(le
 
 /* ---------- header ---------- */
 const header=()=>`<header><div class="brand">${helmet()}<div><h1 class="title"><span class="tsmall">${esc(S.name)}'s</span>Word Galaxy<span class="tplanet" aria-hidden="true"><svg viewBox="0 0 40 40"><ellipse cx="20" cy="22" rx="19" ry="6" fill="none" stroke="#ffd23f" stroke-width="3" transform="rotate(-18 20 20)"/><circle cx="20" cy="20" r="10" fill="#c79bff" stroke="#2b1d6e" stroke-width="2"/><path d="M12 16 Q20 13 28 17" stroke="#ffffff88" stroke-width="2" fill="none"/><path d="M1 26 Q20 33 39 18" stroke="#ffd23f" stroke-width="3" fill="none" transform="rotate(-6 20 20)"/><path d="M33 4 l1 2.2 2.4.3 -1.8 1.6 .5 2.4 -2.1-1.2 -2.1 1.2 .5-2.4 -1.8-1.6 2.4-.3z" fill="#fff"/></svg></span></h1></div></div>
- <div class="chips"><span class="chip"><span class="s">★</span>${S.stars}</span><button class="chip" data-go="locker" aria-label="Open the locker">👕 Locker</button><button class="chip" data-go="prizes" aria-label="Real life rewards">🎁 Rewards</button><button class="chip" data-go="map" aria-label="Open space map">🚀 ${PLANETS[planetIdx()].n}</button></div></header>`;
+ <div class="chips"><span class="chip" title="Stars to spend"><span class="s">★</span>${coins()}</span><button class="chip" data-go="locker" aria-label="Open the locker">👕 Locker</button><button class="chip" data-go="prizes" aria-label="Real life rewards">🎁 Rewards</button><button class="chip" data-go="map" aria-label="Open space map">🚀 ${PLANETS[planetIdx()].n}</button></div></header>`;
 
 /* ---------- home ---------- */
 let idleT=null;
@@ -2213,7 +2213,7 @@ function topBar(){
   const prog=R.i/R.words.length*100;
   return `<div class="top"><button class="link" data-go="home">← Stop</button>
     <div class="track" aria-label="Word ${R.i+1} of ${R.words.length}"><div class="line"></div><div class="done" style="width:${prog}%"></div><div class="ship" style="left:${Math.max(3,prog)}%">${ROCKET(26)}</div><div class="goal">${planetSVG(Math.min(R.startPlanet+1,PLANETS.length-1))}</div></div>
-    <span class="chip"><span class="s">★</span>${S.stars}</span></div>`;
+    <span class="chip" title="Stars to spend"><span class="s">★</span>${coins()}</span></div>`;
 }
 function trainScreen(w){
   const ph=R.phase,steps=[["look","1 Look & say"],["trace","2 Trace"],["spell",R.learnFirst?"3 Play!":"3 Cover & spell"]];
@@ -2626,7 +2626,7 @@ let resetArmed=false;
 function grown(){
   resetArmed=false;
   app.innerHTML=`<div class="top"><button class="link" data-go="home">← Back</button></div>
-  <h2 style="font-family:var(--display);font-size:1.8rem">Grown-ups</h2><p class="label" style="margin:4px 0 0;text-transform:none;letter-spacing:0">Version 20 Oct · v7 &nbsp;<button class="act" data-sndcheck style="padding:4px 12px;font-size:.9rem;min-height:0">🔊 Sound check</button></p><p id="sndres" style="margin:6px 0 0;font-size:.95rem;color:var(--soft);overflow-wrap:anywhere"></p>
+  <h2 style="font-family:var(--display);font-size:1.8rem">Grown-ups</h2><p class="label" style="margin:4px 0 0;text-transform:none;letter-spacing:0">Version 20 Oct · v8 &nbsp;<button class="act" data-sndcheck style="padding:4px 12px;font-size:.9rem;min-height:0">🔊 Sound check</button></p><p id="sndres" style="margin:6px 0 0;font-size:.95rem;color:var(--soft);overflow-wrap:anywhere"></p>
   <div class="panel">
     <label class="f" for="wk">This week's spelling words</label>
     <textarea id="wk" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="One word per line, or separated by commas">${S.weekExample?"":esc(S.week.join("\n"))}</textarea>
