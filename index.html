@@ -685,7 +685,7 @@ section.locked .station{opacity:.4;filter:grayscale(.7)}
 
 /* dyslexia-friendly helpers */
 .tk{background:#ff5d7340;border-bottom:4px solid var(--rocket);border-radius:4px}
-.sy1{color:#7fd4ff}.sgap{margin-left:.1em}
+.sy1{color:#7fd4ff}.sgap{margin-left:0}
 mark.tricky{background:#ff5d7340;color:inherit;border-bottom:4px solid var(--rocket);border-radius:6px;padding:0 .04em}
 .lit{background:var(--star);color:var(--space);border-radius:8px}
 .lw span{display:inline-block;transition:background .15s,color .15s;padding:0 .03em}
@@ -1153,7 +1153,8 @@ function rewardHTML(r,title){
 }
 function factBox(r,title){return `<div class="factbox" data-openfact="${esc(r.q)}"><button class="fbbtn" aria-label="Open your weird fact"><span class="fbmach">${ICONS.jokebox}</span><span class="fbq">?</span></button>
   <div class="fbtap">Tap the machine to get your weird fact!</div><div class="fbcard" hidden>${rewardHTML(r,title)}</div></div>`}
-function openFact(box){if(box.classList.contains("open")||box.classList.contains("opening"))return;box.classList.add("opening");
+let factHold=0;
+function openFact(box){if(box.classList.contains("open")||box.classList.contains("opening"))return;box.classList.add("opening");factHold=Date.now()+2200;document.querySelectorAll(".sq.talk").forEach(b=>b.classList.remove("talk"));
   tone([392,523,659,784],"square",.09,.12,.08);
   setTimeout(()=>{box.classList.remove("opening");box.classList.add("open");box.querySelector(".fbcard").hidden=false;sfx.fanfare&&tone([1047,1319,1568],"triangle",.07,.3,.18);burst(box.querySelector(".fbcard"));
     setTimeout(()=>say(box.dataset.openfact,.9,true),350)},1000)}
@@ -1220,7 +1221,7 @@ Object.defineProperty(app,"innerHTML",{configurable:true,get(){return _ih.get.ca
 const CAPS={}; "I Mr Mrs Ms Dr Miss Monday Tuesday Wednesday Thursday Friday Saturday Sunday January February March April May June July August September October November December England Britain London Christmas Easter".split(" ").forEach(w=>CAPS[w.toLowerCase()]=w);
 function fixCase(w){const l=String(w).toLowerCase();return CAPS[l]||l}
 let S=load();
-const BUILD="20261020f";
+const BUILD="20261020h";
 function restoreOld(){}
 function checkUpdate(){try{fetch("./?u="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.text():"").then(t=>{const m=t.match(/const BUILD="(\w+)"/);if(!m||m[1]===BUILD)return;
  let tried="";try{tried=sessionStorage.getItem("wg-upd")||""}catch(e){}if(tried===m[1])return;try{sessionStorage.setItem("wg-upd",m[1])}catch(e){}
@@ -2001,7 +2002,7 @@ function home(){idleDone=false;setTimeout(armIdle,0);setTimeout(()=>{if(!greetNe
     <div class="info">
       <div class="speech" id="speech">${esc(bossReady()?`${BOSSES[S.planet+1].n} won't let us land on ${PLANETS[S.planet+1].n}! Time for a showdown!`:(homeGreet||(homeGreet=greeting(),greetNew=true,homeGreet)))}</div>
       ${bossReady()?`<button class="bossbtn" data-boss><span class="bossface">${bossSVG(S.planet+1)}</span><span><b>Planet Showdown!</b><small>Beat ${BOSSES[S.planet+1].n} to land on ${PLANETS[S.planet+1].n}</small></span></button>`:""}
-      <div class="fuelbox"><div class="fuelhead"><span>${bossReady()?"Fuel full! Win the showdown to fly on":nx?`Rocket fuel to ${nx.n}`:"Fuel tank full!"}</span><span class="fuelnum">${nx?`${Math.min(S.stars-p.at,nx.at-p.at)} / ${nx.at-p.at}`:S.stars} ★</span></div>
+      <div class="fuelbox"><div class="fuelhead"><span>${bossReady()?"Fuel full! Win the showdown to fly on":nx?`Rocket fuel to ${nx.n}`:"Fuel tank full!"}</span><span class="fuelnum">${nx?(()=>{const f=Math.min(S.stars-p.at,nx.at-p.at)/(nx.at-p.at);return f>=.9?"Nearly there! 🚀":f>=.5?"Over halfway!":f>0?"Filling up…":"Let's go!"})():"🌟"}</span></div>
         <div class="fuel" role="img" aria-label="Rocket fuel ${Math.round(pct)} percent"><i style="width:${Math.max(5,pct)}%"></i></div></div>
       <div class="nowlbl">Now exploring <b>${p.n}</b></div>
     </div>
@@ -2389,13 +2390,16 @@ function squadStart(){const st=document.querySelector(".sqstage");if(!st)return;
    a.el.querySelector(".sqart").style.transform=`scaleX(${Math.abs(a.tx-a.x)>3?dir:1})`;
    if(a.leaving&&(a.x<-15||a.x>115)){a.el.remove();actors.splice(actors.indexOf(a),1)}}
   requestAnimationFrame(step)};requestAnimationFrame(step)}
-function squadTap(btn,quiet){const c=SQUAD.find(x=>x.pal===btn.dataset.squad);if(!c)return;
+function busyTalking(){if(Date.now()<factHold)return true;try{return VOX.busy||speechSynthesis.speaking}catch(e){return VOX.busy}}
+function squadTap(btn,quiet){if(quiet&&busyTalking())return;const c=SQUAD.find(x=>x.pal===btn.dataset.squad);if(!c)return;
  const has=c.lines.filter(t=>voxKey(c.pal,t)),pool=has.length?has:c.lines;
  const i=(squadAt[c.pal]||0)%pool.length;squadAt[c.pal]=i+1;const t=pool[i];
  document.querySelectorAll(".sq.talk").forEach(b=>{if(b!==btn)b.classList.remove("talk")});
  btn.querySelector(".sqbub").textContent=t;btn.classList.remove("talk","trick1","trick2","trick3");void btn.offsetWidth;btn.classList.add("talk","trick"+(1+(Math.random()*3|0)));if(!quiet)sfx.good&&sfx.good();
  clearTimeout(btn._t);btn._t=setTimeout(()=>btn.classList.remove("talk","trick1","trick2","trick3"),2600);
- try{speakAs(c.pal,t)}catch(e){}}
+ const talk=()=>{try{speakAs(c.pal,t)}catch(e){}};
+ if(busyTalking()){btn.classList.remove("talk");btn.classList.add("waiting");let n=0;const w=setInterval(()=>{if(!btn.isConnected||++n>80){clearInterval(w);return}if(!busyTalking()){clearInterval(w);btn.classList.remove("waiting");btn.querySelector(".sqbub").textContent=t;btn.classList.remove("talk");void btn.offsetWidth;btn.classList.add("talk");clearTimeout(btn._t);btn._t=setTimeout(()=>btn.classList.remove("talk","trick1","trick2","trick3"),2600);talk()}},150);return}
+ talk()}
 function jokeBreak(){
   const r=nextReward();save();
   app.innerHTML=topBar()+`<div class="stage" style="text-align:center"><h2 style="font-family:var(--display);font-size:2rem">Halfway there! Time for a break 🛸</h2>${factBox(r,"Bonus")}${squadHTML()}<div class="actions"><button class="act next" data-resume>Keep flying 🚀</button></div></div>`;
@@ -2649,7 +2653,7 @@ function map(){
   <section style="display:flex;flex-direction:column;gap:10px"><div class="label">Space map</div>
   <div class="map">${PLANETS.map((p,i)=>`${i?'<div class="dash"></div>':""}<div class="stop ${i>pi?"locked":""} ${i===pi?"here":""}">
     <div class="planet" style="background:none;box-shadow:none"><div style="position:absolute;inset:-6px">${planetSVG(i)}</div>${i===pi?helmet().replace('class="helmet"','class="helmet" style="width:54px;height:54px;border-width:3px;font-size:1.6rem"'):i>pi?'<span style="position:relative;font-size:2rem">🔒</span>':""}</div>
-    <div><div class="pn">${p.n}</div><div class="pd">${i===0?"Starting point":i>pi?(i===S.planet+1&&bossReady()?`Beat ${BOSSES[i].n} to land here!`:`Unlocks at ${p.at} ★`):"Visited ✓"}</div></div></div>`).join("")}</div></section>
+    <div><div class="pn">${p.n}</div><div class="pd">${i===0?"Starting point":i>pi?(i===S.planet+1&&bossReady()?`Beat ${BOSSES[i].n} to land here!`:(i===pi+1?"Next stop! Keep spelling to fly here":"Keep spelling to unlock")):"Visited ✓"}</div></div></div>`).join("")}</div></section>
   <section style="display:flex;flex-direction:column;gap:10px"><div class="label">My star sky · ${list.length} words collected</div>
   <div class="sky">${list.length?list.map(w=>`<button class="wstar" data-sayword="${esc(w)}" aria-label="Hear ${esc(w)}">⭐ ${esc(w)}</button>`).join(""):`<div class="empty">No stars yet! Spell a word right 3 times in a row, on 2 different days, to collect your first one.</div>`}</div>
   ${list.length?'<p class="hint">Tap a star to hear its word.</p>':""}</section>
@@ -2674,7 +2678,7 @@ let grownOK=0;
 function grown(){if(!grownOK||Date.now()-grownOK>10*60*1000){grownGate();return}grownOK=Date.now();
   resetArmed=false;
   app.innerHTML=`<div class="top"><button class="link" data-go="home">← Back</button></div>
-  <h2 style="font-family:var(--display);font-size:1.8rem">Grown-ups</h2><p class="label" style="margin:4px 0 0;text-transform:none;letter-spacing:0">Version 20 Oct · v9 &nbsp;<button class="act" data-sndcheck style="padding:4px 12px;font-size:.9rem;min-height:0">🔊 Sound check</button></p><p id="sndres" style="margin:6px 0 0;font-size:.95rem;color:var(--soft);overflow-wrap:anywhere"></p>
+  <h2 style="font-family:var(--display);font-size:1.8rem">Grown-ups</h2><p class="label" style="margin:4px 0 0;text-transform:none;letter-spacing:0">Version 20 Oct · v11 &nbsp;<button class="act" data-sndcheck style="padding:4px 12px;font-size:.9rem;min-height:0">🔊 Sound check</button></p><p id="sndres" style="margin:6px 0 0;font-size:.95rem;color:var(--soft);overflow-wrap:anywhere"></p>
   <div class="panel">
     <label class="f" for="wk">This week's spelling words</label>
     <textarea id="wk" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="One word per line, or separated by commas">${S.weekExample?"":esc(S.week.join("\n"))}</textarea>
@@ -2743,7 +2747,7 @@ function grown(){if(!grownOK||Date.now()-grownOK>10*60*1000){grownGate();return}
   </div>
   <div class="panel">
     <div class="label">Progress</div>
-    <p class="hint">High frequency: ${mastered(HFW)} of ${HFW.length} collected · Level 1: ${mastered(Y1)} of ${Y1.length} · Level 2: ${mastered(Y2)} of ${Y2.length} · This week: ${mastered(S.week)} of ${S.week.length} · ${S.stars} stars · best streak ${S.best||0}</p>
+    <p class="hint">High frequency: ${mastered(HFW)} of ${HFW.length} collected · Level 1: ${mastered(Y1)} of ${Y1.length} · Level 2: ${mastered(Y2)} of ${Y2.length} · This week: ${mastered(S.week)} of ${S.week.length} · ${coins()} stars to spend (${S.stars} earned in total, ${S.spent||0} spent) · best streak ${S.best||0}</p>
     <p class="hint sync-${SYNC.state}">${{ok:`\u2601\ufe0f Saved to your family account${SYNC.last?` (last saved ${new Date(SYNC.last).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})})`:""}. Any iPad, phone or computer signed in with the family login shows the same stars, locker and rewards.`,connecting:"\u2601\ufe0f Connecting to your family account\u2026",local:"Progress is saved on this device only.",error:"\u26a0\ufe0f Couldn't reach the family account just now. Progress is safe on this iPad and will save again next time.",full:"\u26a0\ufe0f Your saved progress is too big to sync. Try removing the helmet photo."}[SYNC.state]}</p>
     <div class="label" style="margin-top:6px">Move progress</div>
     <p class="hint">Copy a progress code here, then paste it into Arlo's Word Galaxy somewhere else to bring all his stars, words, pals and rewards across.</p>
