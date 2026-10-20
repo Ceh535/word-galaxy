@@ -1205,6 +1205,14 @@ Object.defineProperty(app,"innerHTML",{configurable:true,get(){return _ih.get.ca
 const CAPS={}; "I Mr Mrs Ms Dr Miss Monday Tuesday Wednesday Thursday Friday Saturday Sunday January February March April May June July August September October November December England Britain London Christmas Easter".split(" ").forEach(w=>CAPS[w.toLowerCase()]=w);
 function fixCase(w){const l=String(w).toLowerCase();return CAPS[l]||l}
 let S=load();
+const BUILD="20261020b";
+function restoreOld(){try{if(S.restored1)return;S.stars=(S.stars||0)+22;S.restored1=true;save()}catch(e){}}
+function checkUpdate(){try{fetch("./?u="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.text():"").then(t=>{const m=t.match(/const BUILD="(\w+)"/);if(!m||m[1]===BUILD)return;
+ let tried="";try{tried=sessionStorage.getItem("wg-upd")||""}catch(e){}if(tried===m[1])return;try{sessionStorage.setItem("wg-upd",m[1])}catch(e){}
+ if(R||T)return;location.replace("./?v="+m[1])}).catch(()=>{})}catch(e){}}
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+restoreOld();
+setTimeout(checkUpdate,2500);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkUpdate()});
 try{if(Array.isArray(S.week))S.week=[...new Set(S.week.map(fixCase))]}catch(e){}
 try{if(S.weekSetId!=="2026-10-19"){S.week=["warm","towards","wart","quarter","war","was","by","to","Mrs"];S.weekExample=false;S.weekSetId="2026-10-19";S.set="week";localStorage.setItem(KEY,JSON.stringify(S))}}catch(e){}
 function fresh(){return{mapV:2,tint:"none",calm:false,font:"andika",name:"Arlo",stars:0,week:EXAMPLE_WEEK.slice(),weekExample:true,set:"week",words:{},logo:null,best:0,sayKeys:true,wide:true,soft:false,spent:0,owned:["suit:white","top:ball"],outfit:{suit:"white",top:"ball",pet:false,trail:false},prize:null}}
@@ -2618,7 +2626,7 @@ let resetArmed=false;
 function grown(){
   resetArmed=false;
   app.innerHTML=`<div class="top"><button class="link" data-go="home">← Back</button></div>
-  <h2 style="font-family:var(--display);font-size:1.8rem">Grown-ups</h2><p class="label" style="margin:4px 0 0;text-transform:none;letter-spacing:0">Version 20 Oct · v6 &nbsp;<button class="act" data-sndcheck style="padding:4px 12px;font-size:.9rem;min-height:0">🔊 Sound check</button></p><p id="sndres" style="margin:6px 0 0;font-size:.95rem;color:var(--soft);overflow-wrap:anywhere"></p>
+  <h2 style="font-family:var(--display);font-size:1.8rem">Grown-ups</h2><p class="label" style="margin:4px 0 0;text-transform:none;letter-spacing:0">Version 20 Oct · v7 &nbsp;<button class="act" data-sndcheck style="padding:4px 12px;font-size:.9rem;min-height:0">🔊 Sound check</button></p><p id="sndres" style="margin:6px 0 0;font-size:.95rem;color:var(--soft);overflow-wrap:anywhere"></p>
   <div class="panel">
     <label class="f" for="wk">This week's spelling words</label>
     <textarea id="wk" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="One word per line, or separated by commas">${S.weekExample?"":esc(S.week.join("\n"))}</textarea>
